@@ -3,6 +3,8 @@
 ベースURL：`/api`  
 認証：`Authorization: Bearer <JWT>` ヘッダー（`/api/auth/login` のみ不要）
 
+一覧系エンドポイントはサーバー側では全件を返却し、フロントエンド側で10件/ページのページネーション表示を行う（`frontend/index.html` の `PAGE_SIZE` / `renderPagination()`）。対象：システム一覧、環境一覧、CI一覧、CMDBリレーション一覧、アプリ依存関係一覧。
+
 ## 認証
 
 | メソッド | パス | 説明 |

@@ -766,6 +766,7 @@ tr.clickable:hover td{background:#F8FAFC;cursor:pointer;}
               <tbody id="cmdbRelTableBody"></tbody>
             </table>
           </div>
+          <div id="cmdbRelPagination" class="pagination-bar" style="display:none;"></div>
         </div>
 
         <!-- アプリケーション依存関係 -->
@@ -796,6 +797,7 @@ tr.clickable:hover td{background:#F8FAFC;cursor:pointer;}
               <tbody id="appDepTableBody"></tbody>
             </table>
           </div>
+          <div id="appDepPagination" class="pagination-bar" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -2733,20 +2735,27 @@ async function loadCiRelations() {
       if (rt) relTypes = rt;
     }
 
+    ciRelPage = 1;
     renderCiRelTable();
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--red);">読み込みに失敗しました</td></tr>';
   }
 }
 
+function setCiRelPage(p) { ciRelPage = p; renderCiRelTable(); }
 function renderCiRelTable() {
   const tbody = document.getElementById('cmdbRelTableBody');
   if (!tbody) return;
   if (!cmdbRelations.length) {
     tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state">リレーションなし</div></td></tr>';
+    document.getElementById('cmdbRelPagination').style.display = 'none';
     return;
   }
-  tbody.innerHTML = cmdbRelations.map(r => `
+  const total = cmdbRelations.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  if (ciRelPage > totalPages && totalPages > 0) ciRelPage = totalPages;
+  const paged = cmdbRelations.slice((ciRelPage - 1) * PAGE_SIZE, ciRelPage * PAGE_SIZE);
+  tbody.innerHTML = paged.map(r => `
     <tr>
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gray-400);">${r.rel_id}</td>
       <td>${tableTypeBadge(r.parent_table)}</td>
@@ -2768,6 +2777,7 @@ function renderCiRelTable() {
           <button class="btn btn-danger btn-sm" style="font-size:11px;padding:2px 8px;" onclick="deleteCmdbRel(${r.rel_id})">削除</button>
         </div>` : '-'}</td>
     </tr>`).join('');
+  renderPagination('cmdbRelPagination', ciRelPage, total, 'setCiRelPage');
 }
 
 function openCmdbRelModal(relId) {
@@ -2852,20 +2862,27 @@ async function loadAppDependencies() {
   tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--gray-400);">読み込み中...</td></tr>';
   try {
     appDependencies = await apiFetch('/api/application-dependencies') || [];
+    appDepPage = 1;
     renderAppDepTable();
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--red);">読み込みに失敗しました</td></tr>';
   }
 }
 
+function setAppDepPage(p) { appDepPage = p; renderAppDepTable(); }
 function renderAppDepTable() {
   const tbody = document.getElementById('appDepTableBody');
   if (!tbody) return;
   if (!appDependencies.length) {
     tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state">依存関係なし</div></td></tr>';
+    document.getElementById('appDepPagination').style.display = 'none';
     return;
   }
-  tbody.innerHTML = appDependencies.map(dep => {
+  const total = appDependencies.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  if (appDepPage > totalPages && totalPages > 0) appDepPage = totalPages;
+  const paged = appDependencies.slice((appDepPage - 1) * PAGE_SIZE, appDepPage * PAGE_SIZE);
+  tbody.innerHTML = paged.map(dep => {
     const mColor = MIGRATION_COLOR[dep.migration_status] || 'var(--gray-300)';
     const mLabel = MIGRATION_LABEL[dep.migration_status] || dep.migration_status;
     return `<tr>
@@ -2887,6 +2904,7 @@ function renderAppDepTable() {
       <td>${currentUser === 'admin' ? `<button class="btn btn-secondary btn-sm" style="font-size:11px;padding:2px 8px;" onclick="openAppDepEditModal(${dep.dependency_id})">編集</button>` : '-'}</td>
     </tr>`;
   }).join('');
+  renderPagination('appDepPagination', appDepPage, total, 'setAppDepPage');
 }
 
 function openAppDepEditModal(depId) {
@@ -3524,7 +3542,7 @@ let ciList = [];
 let ciEditingId = null;
 
 const PAGE_SIZE = 10;
-let appPage = 1, envPage = 1, ciPage = 1;
+let appPage = 1, envPage = 1, ciPage = 1, ciRelPage = 1, appDepPage = 1;
 
 function renderPagination(containerId, page, total, setPageFn) {
   const el = document.getElementById(containerId);
