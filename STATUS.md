@@ -1,11 +1,11 @@
 # STATUS.md
 
-最終更新日: 2026-07-25（ARCHITECTURE.md作成）
+最終更新日: 2026-07-27（HTTPS化完了）
 
 ## 現状
 
-ConoHa VPS（160.251.252.203）へ移行完了、systemd で常時起動中。
-GitHub Actions による自動デプロイが稼働しており、main push で本番反映される。
+`https://ea-journey.com` で公開中。
+nginx（80/443）→ uvicorn（127.0.0.1:8000）のリバースプロキシ構成。TLS は Let's Encrypt・自動更新有効。
 
 ## 完了済み
 
@@ -16,13 +16,13 @@ GitHub Actions による自動デプロイが稼働しており、main push で�
 - タブタイトルを「SPM ポータル」に修正
 - audit.py 循環インポート修正
 - ARCHITECTURE.md 作成（管理方針v2.3対応）
+- HTTPS化（nginx + certbot / Let's Encrypt）— [#1](https://github.com/TakamasaSaito/apm-portal/issues/1)
 
 ## 残タスク
 
-- [#1 HTTPS化（Let's Encrypt）：nginx + certbot でリバースプロキシ構成](https://github.com/TakamasaSaito/apm-portal/issues/1)
 - [#2 seed.py 全面書き直し：日本企業らしいサンプルデータに刷新](https://github.com/TakamasaSaito/apm-portal/issues/2)
 - [#3 コスト・予算の可視化：cost_plan テーブルを使った年度別ダッシュボード](https://github.com/TakamasaSaito/apm-portal/issues/3)
 
 ## 次の一手
 
-DNS 反映を確認後、nginx + certbot でHTTPS化を実施する（Issue #1）。
+seed.py を日本企業らしいサンプルデータに全面書き直しする（Issue #2）。

@@ -15,7 +15,8 @@ graph LR
   subgraph vps["ConoHa VPS 本番"]
     D["git pull"]
     E["systemctl restart\napm-portal.service"]
-    F["uvicorn\nport 8000"]
+    F["uvicorn\n127.0.0.1:8000"]
+    N["nginx\n80/443\n(リバースプロキシ)"]
   end
 
   subgraph browser["ブラウザ"]
@@ -29,8 +30,9 @@ graph LR
   C -->|SSH接続| D
   D --> E
   E --> F
-  F --> G
-  F --> H
+  N -->|proxy_pass| F
+  G -->|HTTPS| N
+  H -->|HTTPS| N
 ```
 
 ## 技術スタック
@@ -45,10 +47,10 @@ graph LR
 
 ## デプロイ先とURL
 
-- **本番**: `http://160.251.252.203:8000`（ConoHa VPS 1GB/2Core、Ubuntu 24.04、`/opt/apm-portal`）
-  - プロセス管理: `systemd` (`apm-portal.service` → uvicorn)
-- **ドメイン**: `ea-journey.com` 取得済み・Aレコード設定済み（反映待ち）
-  - HTTPS化（nginx + certbot）は [Issue #1](https://github.com/TakamasaSaito/apm-portal/issues/1)
+- **本番**: `https://ea-journey.com`（ConoHa VPS 1GB/2Core、Ubuntu 24.04、`/opt/apm-portal`）
+  - プロセス管理: `systemd` (`apm-portal.service` → uvicorn / 127.0.0.1:8000)
+  - リバースプロキシ: nginx（80/443）→ uvicorn。TLS証明書は Let's Encrypt（有効期限 2026-10-25・自動更新）
+  - 旧URL: `http://160.251.252.203:8000`（直接アクセスは不要になったが VPS は稼働中）
 - **旧環境**: Railway（Trial終了により停止。`docs/decisions/001` 参照）
 
 ## 外部依存
@@ -57,7 +59,8 @@ graph LR
 - **GitHub Actions** — 自動デプロイ。Secrets: `VPS_SSH_KEY` / `VPS_HOST` / `VPS_USER`
 - **Chart.js CDN** — cdnjs経由でフロントエンドに読み込み
 - **Claude API** — デマンド審査タスクの自動生成
-- **ConoHa DNS** — `ea-journey.com` のゾーン管理
+- **ConoHa DNS** — `ea-journey.com` のゾーン管理（ConoHa標準NS使用: a.conoha-dns.com / b.conoha-dns.org）
+- **Let's Encrypt / certbot** — TLS証明書の発行・自動更新（certbot --nginx）
 
 ## データの流れ
 
