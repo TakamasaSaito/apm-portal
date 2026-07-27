@@ -1,6 +1,6 @@
 # STATUS.md
 
-最終更新日: 2026-07-27（HTTPS化完了）
+最終更新日: 2026-07-27（seed.py 全面書き直し完了）
 
 ## 現状
 
@@ -17,12 +17,12 @@ nginx（80/443）→ uvicorn（127.0.0.1:8000）のリバースプロキシ構�
 - audit.py 循環インポート修正
 - ARCHITECTURE.md 作成（管理方針v2.3対応）
 - HTTPS化（nginx + certbot / Let's Encrypt）— [#1](https://github.com/TakamasaSaito/apm-portal/issues/1)
+- seed.py 全面書き直し（seed_master.py + seed_demands.py に分割、FK整合性修正）— [#2](https://github.com/TakamasaSaito/apm-portal/issues/2)
 
 ## 残タスク
 
-- [#2 seed.py 全面書き直し：日本企業らしいサンプルデータに刷新](https://github.com/TakamasaSaito/apm-portal/issues/2)
 - [#3 コスト・予算の可視化：cost_plan テーブルを使った年度別ダッシュボード](https://github.com/TakamasaSaito/apm-portal/issues/3)
 
 ## 次の一手
 
-seed.py を日本企業らしいサンプルデータに全面書き直しする（Issue #2）。
+cost_plan テーブルを使った年度別コスト・予算ダッシュボードを実装する（Issue #3）。
